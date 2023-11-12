@@ -1,0 +1,20 @@
+[
+    {
+        "id":1,
+        "dataset_name": "cpm17",
+
+        "log_dir": "logs/cpm17/EPA-ID-0.7-3/",
+        "stats_name": "-stats-cpm17-EPA-ID-0.7-3.json",
+        "train_dir_list": ["C:/Users/Julia/Desktop/datasets/training_data-27-10-2023/cpm17/EPA-ID-0.7-3/cpm17/train/540x540_164x164/"],
+        "valid_dir_list": ["C:/Users/Julia/Desktop/datasets/training_data-27-10-2023/cpm17/EPA-ID-0.7-3/cpm17/valid/540x540_164x164/"]
+    },
+
+    {
+        "id":2,
+        "dataset_name": "kumar",
+        "log_dir": "logs/kumar/EPA-ID-0.7-3/",
+        "stats_name": "-stats-kumar-EPA-ID-0.7-3.json",
+        "train_dir_list": ["C:/Users/Julia/Desktop/datasets/training_data-27-10-2023/kumar/EPA-ID-0.7-3/kumar/train/540x540_164x164"],
+        "valid_dir_list": ["C:/Users/Julia/Desktop/datasets/training_data-27-10-2023/kumar/EPA-ID-0.7-3/kumar/valid/540x540_164x164"]
+    }
+]

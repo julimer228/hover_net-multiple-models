@@ -1,0 +1,1 @@
+{"1": {"valid-np_acc": 0.837763671875, "valid-np_dice": 0.45940581172091394, "valid-hv_mse": 27.639590225219727, "train-loss_np_bce": 2.153226999681473, "train-loss_np_dice": 0.9198936898519082, "train-loss_hv_mse": 20.078780345737425, "train-loss_hv_msge": 267.7764876282229, "train-overall_loss": 290.9283849319096, "train-lr-net": 0.0001}}

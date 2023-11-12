@@ -66,8 +66,8 @@ def worker_init_fn(worker_id):
 class TrainManager(Config):
     """Either used to view the dataset or to initialise the main training loop."""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, config):
+        super().__init__(config)
         return
 
     ####
@@ -132,7 +132,7 @@ class TrainManager(Config):
         return dataloader
 
     ####
-    def run_once(self, opt, run_engine_opt, log_dir, prev_log_dir=None, fold_idx=0):
+    def run_once(self,phase_idx, opt, run_engine_opt, log_dir, prev_log_dir=None, fold_idx=0):
         """Simply run the defined run_step of the related method once."""
         check_manual_seed(self.seed)
 
@@ -142,7 +142,7 @@ class TrainManager(Config):
             rm_n_mkdir(log_dir)
 
             tfwriter = SummaryWriter(log_dir=log_dir)
-            json_log_file = log_dir + "/stats.json"
+            json_log_file = log_dir+str(phase_idx)+self.stats_name
             with open(json_log_file, "w") as json_file:
                 json.dump({}, json_file)  # create empty file
             log_info = {
@@ -162,7 +162,7 @@ class TrainManager(Config):
             )
         ####
         def get_last_chkpt_path(prev_phase_dir, net_name):
-            stat_file_path = prev_phase_dir + "/stats.json"
+            stat_file_path = prev_phase_dir+str(phase_idx-1)+self.stats_name
             with open(stat_file_path) as stat_file:
                 info = json.load(stat_file)
             epoch_list = [int(v) for v in info.keys()]
@@ -285,7 +285,7 @@ class TrainManager(Config):
                 save_path = self.log_dir
             else:
                 save_path = self.log_dir + "/%02d/" % (phase_idx)
-            self.run_once(
+            self.run_once(phase_idx,
                 phase_info, engine_opt, save_path, prev_log_dir=prev_save_path
             )
             prev_save_path = save_path
@@ -294,12 +294,23 @@ class TrainManager(Config):
 ####
 if __name__ == "__main__":
     args = docopt(__doc__, version="HoVer-Net v1.0")
-    trainer = TrainManager()
+    
+    with open('config_train.json', 'r') as json_file:
+        config_list = json.load(json_file)
+    
+    for config in config_list:
+        trainer = TrainManager(config)
 
-    if args["--view"]:
-        if args["--view"] != "train" and args["--view"] != "valid":
-            raise Exception('Use "train" or "valid" for --view.')
-        trainer.view_dataset(args["--view"])
-    else:
-        os.environ["CUDA_VISIBLE_DEVICES"] = args["--gpu"]
-        trainer.run()
+        if args["--view"]:
+            if args["--view"] != "train" and args["--view"] != "valid":
+                raise Exception('Use "train" or "valid" for --view.')
+            trainer.view_dataset(args["--view"])
+        else:
+            os.environ["CUDA_VISIBLE_DEVICES"] = args["--gpu"]
+            trainer.run()
+    
+    print("\n")
+    print("########################################################")
+    print("########################################################")
+    print("\n")
+

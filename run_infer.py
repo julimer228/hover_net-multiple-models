@@ -77,10 +77,12 @@ import os
 import copy
 from misc.utils import log_info
 from docopt import docopt
-
+import json
 #-------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    
+    
     sub_cli_dict = {'tile' : tile_cli, 'wsi' : wsi_cli}
     args = docopt(__doc__, help=False, options_first=True, 
                     version='HoVer-Net Pytorch Inference v1.0')
@@ -122,24 +124,14 @@ if __name__ == '__main__':
         raise Exception('A model path must be supplied as an argument with --model_path.')
 
     nr_types = int(args['nr_types']) if int(args['nr_types']) > 0 else None
-    method_args = {
-        'method' : {
-            'model_args' : {
-                'nr_types'   : nr_types,
-                'mode'       : args['model_mode'],
-            },
-            'model_path' : args['model_path'],
-        },
-        'type_info_path'  : None if args['type_info_path'] == '' \
-                            else args['type_info_path'],
-    }
+
 
     # ***
     run_args = {
-        'batch_size' : int(args['batch_size']) * nr_gpus,
+        'batch_size' : int(16) * nr_gpus,
 
-        'nr_inference_workers' : int(args['nr_inference_workers']),
-        'nr_post_proc_workers' : int(args['nr_post_proc_workers']),
+        'nr_inference_workers' : int(6),
+        'nr_post_proc_workers' : int(6),
     }
 
     if args['model_mode'] == 'fast':
@@ -149,38 +141,43 @@ if __name__ == '__main__':
         run_args['patch_input_shape'] = 270
         run_args['patch_output_shape'] = 80
 
-    if sub_cmd == 'tile':
-        run_args.update({
-            'input_dir'      : sub_args['input_dir'],
-            'output_dir'     : sub_args['output_dir'],
+    with open('config_process.json', 'r') as json_file:
+        config_list = json.load(json_file)
 
-            'mem_usage'   : float(sub_args['mem_usage']),
-            'draw_dot'    : sub_args['draw_dot'],
-            'save_qupath' : sub_args['save_qupath'],
-            'save_raw_map': sub_args['save_raw_map'],
-        })
 
-    if sub_cmd == 'wsi':
-        run_args.update({
-            'input_dir'      : sub_args['input_dir'],
-            'output_dir'     : sub_args['output_dir'],
-            'input_mask_dir' : sub_args['input_mask_dir'],
-            'cache_path'     : sub_args['cache_path'],
-
-            'proc_mag'       : int(sub_args['proc_mag']),
-            'ambiguous_size' : int(sub_args['ambiguous_size']),
-            'chunk_shape'    : int(sub_args['chunk_shape']),
-            'tile_shape'     : int(sub_args['tile_shape']),
-            'save_thumb'     : sub_args['save_thumb'],
-            'save_mask'      : sub_args['save_mask'],
-        })
-    # ***
-    
+    sub_cmd = 'tile'
     if sub_cmd == 'tile':
         from infer.tile import InferManager
-        infer = InferManager(**method_args)
-        infer.process_file_list(run_args)
-    else:
-        from infer.wsi import InferManager
-        infer = InferManager(**method_args)
-        infer.process_wsi_list(run_args)
+        for config in config_list:
+            input_dirs = [config["input_dir_test"], config["input_dir_train"]]
+            output_dirs = [config["input_dir_test"], config["input_dir_train"]]
+            for input_dir, output_dir in input_dirs, output_dirs:
+                method_args = {
+                'method' : {
+                    'model_args' : {
+                        'nr_types'   : nr_types,
+                        'mode'       : config['model_mode'],
+                    },
+                    'model_path' : config['model_path'],
+                },
+            'type_info_path'  : None if args['type_info_path'] == '' \
+                                else args['type_info_path'],
+            }
+                if sub_cmd == 'tile':
+                    run_args.update({
+                        'input_dir'      : input_dir,
+                        'output_dir'     : output_dir,
+
+                        'mem_usage'   : float(sub_args['mem_usage']),
+                        'draw_dot'    : sub_args['draw_dot'],
+                        'save_qupath' : sub_args['save_qupath'],
+                        'save_raw_map': sub_args['save_raw_map'],
+                    })
+                    
+                    
+                infer = InferManager(**method_args)
+                infer.process_file_list(run_args)
+                
+                print("\n")
+                print("##########################################")
+                print("\n")

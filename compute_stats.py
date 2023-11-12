@@ -2,7 +2,7 @@ import argparse
 import cProfile as profile
 import glob
 import os
-
+import json
 import cv2
 import numpy as np
 import pandas as pd
@@ -179,13 +179,14 @@ def run_nuclei_type_stat(pred_dir, true_dir, type_uid_list=None, exhaustive=True
     return
 
 
-def run_nuclei_inst_stat(pred_dir, true_dir, print_img_stats=False, ext=".mat"):
+def run_nuclei_inst_stat(pred_dir, true_dir, stats_dir, stats_name, print_img_stats=False, ext=".mat"):
     # print stats of each image
     print(pred_dir)
 
     file_list = glob.glob("%s/*%s" % (pred_dir, ext))
     file_list.sort()  # ensure same order
-
+    names=[]
+    filepaths=[]
     metrics = [[], [], [], [], [], []]
     for filename in file_list[:]:
         filename = os.path.basename(filename)
@@ -202,6 +203,8 @@ def run_nuclei_inst_stat(pred_dir, true_dir, print_img_stats=False, ext=".mat"):
         true = remap_label(true, by_size=False)
 
         pq_info = get_fast_pq(true, pred, match_iou=0.5)[0]
+        names.append(basename)
+        filepaths.append(filename)
         metrics[0].append(get_dice_1(true, pred))
         metrics[1].append(get_fast_aji(true, pred))
         metrics[2].append(pq_info[0])  # dq
@@ -209,12 +212,24 @@ def run_nuclei_inst_stat(pred_dir, true_dir, print_img_stats=False, ext=".mat"):
         metrics[4].append(pq_info[2])  # pq
         metrics[5].append(get_fast_aji_plus(true, pred))
 
-        if print_img_stats:
-            print(basename, end="\t")
-            for scores in metrics:
-                print("%f " % scores[-1], end="  ")
-            print()
+
+        print(basename, end="\t")
+        for scores in metrics:
+            print("%f " % scores[-1], end="  ")
+        print()
     ####
+    
+    df=pd.DataFrame()
+    df["Name"]=names
+    df["Filepath"]=filepaths
+    df["DICE"]=metrics[0]
+    df["AJI"]=metrics[1]
+    df["DQ"]=metrics[2]
+    df["SQ"]=metrics[3]
+    df["PQ"]=metrics[4]
+    df["AJI+"]=metrics[5]
+    df.to_csv(stats_dir+stats_name)
+    
     metrics = np.array(metrics)
     metrics_avg = np.mean(metrics, axis=-1)
     np.set_printoptions(formatter={"float": "{: 0.5f}".format})
@@ -224,25 +239,12 @@ def run_nuclei_inst_stat(pred_dir, true_dir, print_img_stats=False, ext=".mat"):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--mode",
-        help="mode to run the measurement,"
-        "`type` for nuclei instance type classification or"
-        "`instance` for nuclei instance segmentation",
-        nargs="?",
-        default="instance",
-        const="instance",
-    )
-    parser.add_argument(
-        "--pred_dir", help="point to output dir", nargs="?", default="", const=""
-    )
-    parser.add_argument(
-        "--true_dir", help="point to ground truth dir", nargs="?", default="", const=""
-    )
-    args = parser.parse_args()
+    with open('config_stats.json', 'r') as json_file:
+        config_list = json.load(json_file)
 
-    if args.mode == "instance":
-        run_nuclei_inst_stat(args.pred_dir, args.true_dir, print_img_stats=False)
-    if args.mode == "type":
-        run_nuclei_type_stat(args.pred_dir, args.true_dir)
+    for config in config_list:
+        pred_dirs = [config["pred_dir_test"],config["pred_dir_train"]]
+        true_dirs = [config["true_dir_test"],config["true_dir_train"]]
+        res_names = [config["res_name_test"],config["res_name_train"]]
+        for pred_dir, true_dir, res_name in pred_dirs, true_dirs, res_names:
+            run_nuclei_inst_stat(pred_dir, true_dir,config["stats_dir"],res_name, print_img_stats=False)

@@ -20,7 +20,7 @@ from dataset import get_dataset
 if __name__ == "__main__":
 
     # Determines whether to extract type map (only applicable to datasets with class labels).
-    type_classification = True
+    type_classification = False
 
     win_size = [540, 540]
     step_size = [164, 164]
@@ -28,18 +28,18 @@ if __name__ == "__main__":
 
     # Name of dataset - use Kumar, CPM17 or CoNSeP.
     # This used to get the specific dataset img and ann loading scheme from dataset.py
-    dataset_name = "consep"
-    save_root = "dataset/training_data/%s/" % dataset_name
+    dataset_name = "cpm17"
+    save_root = "E:/datasets/training_data-08-11-2023/%s/epaid-equation-90" % dataset_name
 
     # a dictionary to specify where the dataset path should be
     dataset_info = {
         "train": {
-            "img": (".png", "dataset/CoNSeP/Train/Images/"),
-            "ann": (".mat", "dataset/CoNSeP/Train/Labels/"),
+            "img": (".png", "E:/datasets/images/cpm17/train/Images/epaid-equation-90/"),
+            "ann": (".mat", "E:/datasets/images/cpm17/train/Labels"),
         },
         "valid": {
-            "img": (".png", "dataset/CoNSeP/Test/Images/"),
-            "ann": (".mat", "dataset/CoNSeP/Test/Labels/"),
+            "img": (".png", "E:/datasets/images/cpm17/test/Images/epaid-equation-90/"),
+            "ann": (".mat", "E:/datasets/images/cpm17/test/Labels"),
         },
     }
 

@@ -9,13 +9,11 @@ from dataset import get_dataset
 
 class Config(object):
     """Configuration file."""
-
-    def __init__(self):
+        
+    def __init__(self, config):
+        
         self.seed = 10
-
         self.logging = True
-
-        # turn on debug flag to trace some parallel processing problems more easily
         self.debug = False
 
         model_name = "hovernet"
@@ -24,10 +22,10 @@ class Config(object):
         if model_mode not in ["original", "fast"]:
             raise Exception("Must use either `original` or `fast` as model mode")
 
-        nr_type = 5 # number of nuclear types (including background)
+        nr_type = None # number of nuclear types (including background)
 
         # whether to predict the nuclear type, availability depending on dataset!
-        self.type_classification = True
+        self.type_classification = False
 
         # shape information - 
         # below config is for original mode. 
@@ -44,16 +42,13 @@ class Config(object):
             if act_shape != [256,256] or out_shape != [164,164]:
                 raise Exception("If using `fast` mode, input shape must be [256,256] and output shape must be [164,164]")
 
-        self.dataset_name = "consep" # extracts dataset info from dataset.py
-        self.log_dir = "logs/" # where checkpoints will be saved
+        self.dataset_name = config["dataset_name"] # extracts dataset info from dataset.py
+        self.log_dir = config["log_dir"]  # where checkpoints will be saved
+        self.stats_name = config["stats_name"]
 
         # paths to training and validation patches
-        self.train_dir_list = [
-            "train_patches_path"
-        ]
-        self.valid_dir_list = [
-            "valid_patches_path"
-        ]
+        self.train_dir_list = config["train_dir_list"]
+        self.valid_dir_list = config["valid_dir_list"]
 
         self.shape_info = {
             "train": {"input_shape": act_shape, "mask_shape": out_shape,},
@@ -67,3 +62,5 @@ class Config(object):
             "models.%s.opt" % model_name
         )
         self.model_config = module.get_config(nr_type, model_mode)
+
+

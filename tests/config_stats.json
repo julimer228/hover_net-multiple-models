@@ -1,0 +1,17 @@
+[
+    {
+        "id":1,
+
+        "dataset_name":"cpm17",
+    
+        "stats_dir":"datasets/images/cpm17/test/Results/EPA-ID-0.7-3/",
+        
+        "res_name_test": "cpm17-EPA-ID-0.7-3-test.csv",
+        "pred_dir_test": "datasets/images/cpm17/test/Results/EPA-ID-0.7-3/mat/",
+        "true_dir_test": "datasets/images/cpm17/test/Labels/",
+
+        "res_name_train": "cpm17-EPA-ID-0.7-3-test.csv",
+        "pred_dir_train": "datasets/images/cpm17/test/Results/EPA-ID-0.7-3/mat/",
+        "true_dir_train": "datasets/images/cpm17/test/Labels/"
+    }
+]

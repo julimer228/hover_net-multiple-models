@@ -1,0 +1,28 @@
+[
+    {
+        "id":1,
+
+        "dataset_name":"cpm17",
+        "model_path":"model",
+        "model_mode":"original",
+
+        "input_dir_test":"path_input_dir",
+        "output_dir_test":"output",
+
+        "input_dir_train":"path_input_dir",
+        "output_dir_train":"output"
+    },
+    {
+        "id":2,
+
+        "dataset_name":"kumar",
+        "model_path":"model",
+        "model_mode":"original",
+
+        "input_dir_test":"path_input_dir",
+        "output_dir_test":"output",
+
+        "input_dir_train":"path_input_dir",
+        "output_dir_train":"output"
+    }
+]
