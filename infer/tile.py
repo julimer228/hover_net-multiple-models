@@ -3,6 +3,7 @@ import multiprocessing
 from multiprocessing import Lock, Pool
 
 multiprocessing.set_start_method("spawn", True)  # ! must be at top for VScode debugging
+
 import argparse
 import glob
 import json
@@ -151,6 +152,7 @@ class InferManager(base.InferManager):
         """
         Process a single image tile < 5000x5000 in size.
         """
+        torch.multiprocessing.set_sharing_strategy('file_system')
         for variable, value in run_args.items():
             self.__setattr__(variable, value)
         assert self.mem_usage < 1.0 and self.mem_usage > 0.0
@@ -253,6 +255,7 @@ class InferManager(base.InferManager):
             cache_image_info_list = []
             while len(file_path_list) > 0:
                 file_path = file_path_list.pop(0)
+                
 
                 img = cv2.imread(file_path)
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -271,6 +274,7 @@ class InferManager(base.InferManager):
                 expected_usage = sys.getsizeof(img) * 5
                 available_ram -= expected_usage
                 if available_ram < 0:
+                    file_path_list.append(file_path)
                     break
 
                 file_idx += 1
